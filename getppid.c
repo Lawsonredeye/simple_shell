@@ -4,12 +4,12 @@
 
 /**
  * main - function that prints the parent PID
- * Return: nothing cos the code was successful
+ * Return: 0 on success
  */
 int main(void)
 {
-	pid_t myppid = getppid();
+	pid_t my_ppid = getppid();
 
-	printf("%i\n", myppid);
+	printf("%i\n", my_ppid);
 	return (0);
 }
