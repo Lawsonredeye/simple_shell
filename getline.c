@@ -10,7 +10,7 @@
  * @stream: where the file is being read from
  * Return: the number of character read
  */
-ssize_t _getline(char **lineptr, size_t *n,FILE *stream)
+ssize_t _getline(char **lineptr, size_t *n, FILE *stream)
 {
 	char *buffer;
 	char *temp, *file_gets;
@@ -37,9 +37,11 @@ ssize_t _getline(char **lineptr, size_t *n,FILE *stream)
 	if (char_read >= buff_size - 1)
 	{
 		buff_size *= 2;
-		temp = realloc (*lineptr, buff_size);
+		temp = realloc(*lineptr, buff_size);
 		if (temp == NULL)
+		{
 			return (-1);
+		}
 		else
 		{
 			*lineptr = temp;
