@@ -1,5 +1,5 @@
 #include <string.h>
-
+#include "main.h"
 /**
  * _strtok - function that tokenize a string
  * @str: string to be tokenized
@@ -27,6 +27,10 @@ char *_strtok(char *str, const char *delim)
 			{
 				marker[i] = '\0';
 				marker = &marker[i + 1];
+				if (*marker == '\0')
+				{
+					marker = NULL;
+				}
 				return (start_token);
 				break;
 			}
@@ -36,4 +40,3 @@ char *_strtok(char *str, const char *delim)
 		marker = NULL;
 	return(start_token);
 }
-
