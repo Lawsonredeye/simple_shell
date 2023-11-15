@@ -18,11 +18,13 @@ ssize_t _getline(char **lineptr, size_t *n, FILE *stream)
 
 	if (*n == 0)
 		*n = 1024;
-	buffer = malloc(sizeof(char) * (*n));
-	if (buffer == NULL)
-		return (-1);
 	if (*lineptr == NULL)
+	{
+		buffer = malloc(sizeof(char) * (*n));
+		if (buffer == NULL)
+			return (-1);
 		*lineptr = buffer;
+	}
 	buff_size = *n;
 	file_gets = fgets(*lineptr, *n, stream);
 	if (file_gets == NULL)
@@ -30,23 +32,33 @@ ssize_t _getline(char **lineptr, size_t *n, FILE *stream)
 		if (ferror(stream))
 		{
 			perror("Error");
+			free(*lineptr);
 		}
 		return (-1);
 	}
 	char_read = strlen(*lineptr);
-	if (char_read >= buff_size - 1)
+	if (char_read > 1)
 	{
-		buff_size *= 2;
-		temp = realloc(*lineptr, buff_size);
-		if (temp == NULL)
+		if (char_read >= buff_size - 1)
 		{
-			return (-1);
+			buff_size *= 2;
+			temp = realloc(*lineptr, buff_size);
+			if (temp == NULL)
+			{
+				free(*lineptr);
+				return (-1);
+			}
+			else
+			{
+				*lineptr = temp;
+				*n = buff_size;
+			}
 		}
-		else
-		{
-			*lineptr = temp;
-			*n = buff_size;
-		}
+		return (char_read);
 	}
-	return (char_read);
+	else
+	{
+		*lineptr[0] = '\0';
+		return(0);
+	}
 }
