@@ -32,7 +32,7 @@ int main(int ac, char *envp[])
 			fflush(stdout);
 		}
 		/* get cracters from the stdin and store it in a buffer */
-		dline = getline(&lineptr, &n, stdin);
+		dline = _getline(&lineptr, &n, stdin);
 		if (dline == -1) /*checking if getline fails */
 		{
 			perror("Error line");
@@ -40,11 +40,11 @@ int main(int ac, char *envp[])
 			return (-1);
 		}
 		/*storing a temp value in the token to be tokenized/ parsed */
-		token = strtok(lineptr, " \n");
+		token = _strtok(lineptr, " \n");
 		for (i = 0; token != NULL; i++)
 		{
 			temptoken[i] = token;
-			token = strtok(NULL, " \n");
+			token = _strtok(NULL, " \n");
 		}
 		/*put the last element in the temptoken to NULL to indiacte end*/
 		temptoken[i] = NULL;
