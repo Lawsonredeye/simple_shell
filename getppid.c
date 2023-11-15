@@ -6,10 +6,11 @@
  * main - function that prints the parent PID
  * Return: 0 on success
  */
-int main(void)
+/*int main(void)
 {
 	pid_t my_ppid = getppid();
 
 	printf("%i\n", my_ppid);
 	return (0);
 }
+*/
