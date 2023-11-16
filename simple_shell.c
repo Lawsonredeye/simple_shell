@@ -32,9 +32,10 @@ int main(int ac, char *envp[])
 			fflush(stdin);
 		}
 		/* get cracters from the stdin and store it in a buffer */
-		if (getline(&lineptr, &n, stdin) != -1) /*checking if getline fails */
+		if (_getline(&lineptr, &n, stdin) != -1) /*checking if getline fails */
 		{
 			lenght = strlen(lineptr);
+			if (lenght > 0)
 			lineptr[lenght - 1] = '\0';
 		}
 		else
@@ -49,11 +50,11 @@ int main(int ac, char *envp[])
 			return (-1);
 		}
 		/*storing a temp value in the token to be tokenized/ parsed */
-		token = strtok(lineptr, " ,\n");
+		token = _strtok(lineptr, " ,\n");
 		for (i = 0; token != NULL && i < 31; i++)
 		{
 			temptoken[i] = token;
-			token = strtok(NULL, " ,\n");
+			token = _strtok(NULL, " ,\n");
 		}
 		/*put the last element in the temptoken to NULL to indicate end*/
 		temptoken[i] = NULL;
@@ -68,6 +69,7 @@ int main(int ac, char *envp[])
 		if (child == -1)
 		{
 			perror("./hsh");
+			free(lineptr);
 			return (-1);
 		}
 		if (child == 0)
