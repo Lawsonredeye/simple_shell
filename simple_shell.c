@@ -22,7 +22,7 @@ int main(int ac, char *envp[])
 	size_t n = 0;
 	pid_t child;
 	char *lineptr = NULL, *token = NULL, *temptoken[32];
-	int i, j, chill, lenght = 0;
+	int i, chill, status = 0, lenght = 0;
 
 	while (1)
 	{
@@ -36,18 +36,18 @@ int main(int ac, char *envp[])
 		{
 			lenght = strlen(lineptr);
 			if (lenght > 0)
-			lineptr[lenght - 1] = '\0';
+				lineptr[lenght - 1] = '\0';
 		}
 		else
 		{
 			if (feof(stdin))
 			{
 				free(lineptr);
-				return (-1);
+				exit(1);
 			}
 			perror("Getline failed");
 			free(lineptr);
-			return (-1);
+			exit(1);
 		}
 		/*storing a temp value in the token to be tokenized/ parsed */
 		token = _strtok(lineptr, " ,\n");
@@ -63,40 +63,49 @@ int main(int ac, char *envp[])
 		{
 			free(lineptr);
 			printf("Terminal Closed\n");
-			exit(EXIT_SUCCESS);
+			exit(0);
 		}
 		child = fork();
 		if (child == -1)
 		{
 			perror("./hsh");
 			free(lineptr);
-			return (-1);
+			exit(1);
 		}
 		if (child == 0)
 		{
+			if (temptoken[0] == NULL || strcmp(temptoken[0], "") == 0)
+			{
+				free(lineptr);
+				exit(0);
+			}
 			/*check if the string entered inside the child process is env*/
 			if (strcmp(temptoken[0], "env") == 0)
 			{
-				for (j = 0; envp[j] != NULL; j++)
+				for (i = 0; envp[i] != NULL; i++)
 				{
-					printf("%s\n", envp[j]);
+					printf("%s\n", envp[i]);
 				}
-				envp[j] = NULL;
-				free(lineptr);
-				exit(EXIT_SUCCESS);
+				exit(0);
 			}
 			if (execve(temptoken[0], temptoken, NULL) == -1)
 				/*checks if the execve fails to stop the program*/
 			{
 				perror("./hsh here");
 				free(lineptr);
-				return (-1);
+				exit(0);
 			}
 		}
 		else
 		{
 			waitpid(child, &chill, 0);
+			if (WIFEXITED(chill))
+			{
+				status = WEXITSTATUS(chill);
+				exit(status);
+			}
 		}
+		printf("$ ");
 	}
 	printf("\n");
 	free(lineptr);
