@@ -43,11 +43,11 @@ int main(int ac, char *envp[])
 			if (feof(stdin))
 			{
 				free(lineptr);
-				exit(1);
+				exit(EXIT_FAILURE);
 			}
 			perror("Getline failed");
 			free(lineptr);
-			exit(1);
+			exit(-1);
 		}
 		/*storing a temp value in the token to be tokenized/ parsed */
 		token = _strtok(lineptr, " ,\n");
@@ -86,19 +86,20 @@ int main(int ac, char *envp[])
 				{
 					printf("%s\n", envp[i]);
 				}
-				exit(0);
+				free(lineptr);
+				exit(EXIT_SUCCESS);
 			}
 			if (execve(temptoken[0], temptoken, NULL) == -1)
 				/*checks if the execve fails to stop the program*/
 			{
 				perror("./hsh here");
 				free(lineptr);
-				exit(0);
+				return (-1);
 			}
 		}
 		else
 		{
-			waitpid(child, &chill, 0);
+			wait(&chill);
 		}
 	}
 	printf("\n");
