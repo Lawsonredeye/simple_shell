@@ -93,6 +93,7 @@ int main(int ac, char *envp[])
 		}
 		else
 		{
+			waitpid(child, &chill, 0);
 		}
 	}
 	printf("\n");
