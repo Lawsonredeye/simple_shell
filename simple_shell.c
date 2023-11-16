@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include "main.h"
 #include <string.h>
+#include <errno.h>
+#include <fcntl.h>
 int main(int ac, char *envp[]);
 
 /**
@@ -18,38 +20,45 @@ int main(int ac, char *envp[]);
 int main(int ac, char *envp[])
 {
 	size_t n = 0;
-	ssize_t dline;
 	pid_t child;
 	char *lineptr = NULL, *token = NULL, *temptoken[32];
-	int i, j, chill;
-	(void) ac;
+	int i, j, chill, lenght = 0;
 
 	while (1)
 	{
-		if (isatty(STDIN_FILENO) && isatty(STDOUT_FILENO))
+		if (isatty(STDIN_FILENO) && isatty(STDOUT_FILENO) && ac == 1)
 		{
 			printf("$ ");
-			fflush(stdout);
+			fflush(stdin);
 		}
 		/* get cracters from the stdin and store it in a buffer */
-		dline = getline(&lineptr, &n, stdin);
-		if (dline == -1) /*checking if getline fails */
+		if (getline(&lineptr, &n, stdin) != -1) /*checking if getline fails */
 		{
-			perror("Error line");
+			lenght = strlen(lineptr);
+			lineptr[lenght - 1] = '\0';
+		}
+		else
+		{
+			if (feof(stdin))
+			{
+				free(lineptr);
+				return (-1);
+			}
+			perror("Getline failed");
 			free(lineptr);
 			return (-1);
 		}
 		/*storing a temp value in the token to be tokenized/ parsed */
-		token = strtok(lineptr, " \n");
-		for (i = 0; token != NULL; i++)
+		token = strtok(lineptr, " ,\n");
+		for (i = 0; token != NULL && i < 31; i++)
 		{
 			temptoken[i] = token;
-			token = strtok(NULL, " \n");
+			token = strtok(NULL, " ,\n");
 		}
-		/*put the last element in the temptoken to NULL to indiacte end*/
+		/*put the last element in the temptoken to NULL to indicate end*/
 		temptoken[i] = NULL;
-		if (strcmp(temptoken[0], "exit") == 0)
-		/*check if the tokenized character is exit to close the terminal*/
+		if (temptoken[0] != NULL && strcmp(temptoken[0], "exit") == 0)
+			/*check if the tokenized character is exit to close the terminal*/
 		{
 			free(lineptr);
 			printf("Terminal Closed\n");
@@ -74,13 +83,8 @@ int main(int ac, char *envp[])
 				free(lineptr);
 				exit(EXIT_SUCCESS);
 			}
-			if (temptoken == NULL || strcmp(temptoken[0], "") == 0)
-			{
-				free(lineptr);
-				exit(EXIT_SUCCESS);
-			}
 			if (execve(temptoken[0], temptoken, NULL) == -1)
-			/*checks if the execve fails to stop the program*/
+				/*checks if the execve fails to stop the program*/
 			{
 				perror("./hsh here");
 				free(lineptr);
@@ -89,7 +93,7 @@ int main(int ac, char *envp[])
 		}
 		else
 		{
-			wait(&chill);
+			waitpid(child, &chill, 0);
 		}
 	}
 	printf("\n");
