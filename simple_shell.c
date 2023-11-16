@@ -22,7 +22,7 @@ int main(int ac, char *envp[])
 	size_t n = 0;
 	pid_t child;
 	char *lineptr = NULL, *token = NULL, *temptoken[32];
-	int i, chill, status = 0, lenght = 0;
+	int i, chill, lenght = 0;
 
 	while (1)
 	{
@@ -99,13 +99,7 @@ int main(int ac, char *envp[])
 		else
 		{
 			waitpid(child, &chill, 0);
-			if (WIFEXITED(chill))
-			{
-				status = WEXITSTATUS(chill);
-				exit(status);
-			}
 		}
-		printf("$ ");
 	}
 	printf("\n");
 	free(lineptr);
