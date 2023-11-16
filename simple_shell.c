@@ -50,11 +50,11 @@ int main(int ac, char *envp[])
 			exit(-1);
 		}
 		/*storing a temp value in the token to be tokenized/ parsed */
-		token = _strtok(lineptr, " ,\n");
+		token = _strtok(lineptr, " ");
 		for (i = 0; token != NULL && i < 31; i++)
 		{
 			temptoken[i] = token;
-			token = _strtok(NULL, " ,\n");
+			token = _strtok(NULL, " ");
 		}
 		/*put the last element in the temptoken to NULL to indicate end*/
 		temptoken[i] = NULL;
