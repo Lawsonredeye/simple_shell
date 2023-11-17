@@ -13,7 +13,6 @@ int main(int ac, char *envp[]);
  * that works in similar ways but dont do all the complex task
  * that the shell does.
  * @ac: argument count
- * @av: argument vector from the command line
  * @envp: environment variable
  * Return: 0 Always
  */
@@ -22,14 +21,14 @@ int main(int ac, char *envp[])
 	size_t n = 0;
 	pid_t child;
 	char *lineptr = NULL, *token = NULL, *temptoken[32];
-	int i, chill, lenght = 0;
+	int i, status, chill, lenght = 0;
 
 	while (1)
 	{
 		if (isatty(STDIN_FILENO) && isatty(STDOUT_FILENO) && ac == 1)
 		{
 			printf("$ ");
-			fflush(stdin);
+			fflush(stdout);
 		}
 		/* get cracters from the stdin and store it in a buffer */
 		if (_getline(&lineptr, &n, stdin) != -1) /*checking if getline fails */
@@ -47,7 +46,7 @@ int main(int ac, char *envp[])
 			}
 			perror("Getline failed");
 			free(lineptr);
-			exit(-1);
+			exit(1);
 		}
 		/*storing a temp value in the token to be tokenized/ parsed */
 		token = _strtok(lineptr, " ");
@@ -70,7 +69,7 @@ int main(int ac, char *envp[])
 		{
 			perror("./hsh");
 			free(lineptr);
-			exit(1);
+			return (-1);
 		}
 		if (child == 0)
 		{
@@ -100,9 +99,13 @@ int main(int ac, char *envp[])
 		else
 		{
 			wait(&chill);
+			if (WIFEXITED(chill))
+			{
+				status = WEXITSTATUS(chill);
+			}
 		}
 	}
 	printf("\n");
 	free(lineptr);
-	return (0);
+	return (status);
 }
