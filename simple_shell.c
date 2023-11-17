@@ -25,14 +25,14 @@ int main(int ac, char *envp[])
 	int i, status, chill, length = 0;
 	char *path, *dir, *executable_path;
 
-	signal(SIGINT, SIG_IGN);
+	signal(SIGINT, CtrlCHandler);
+	if (isatty(STDIN_FILENO) && isatty(STDOUT_FILENO) && ac == 1)
+	{
+		printf(" ");
+		fflush(stdout);
+	}
 	while (1)
 	{
-		if (isatty(STDIN_FILENO) && isatty(STDOUT_FILENO) && ac == 1)
-		{
-			printf("$ ");
-			fflush(stdout);
-		}
 		if (_getline(&lineptr, &n, stdin) != -1)
 		{
 			length = strlen(lineptr);
