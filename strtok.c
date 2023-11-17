@@ -32,11 +32,11 @@ char *_strtok(char *str, const char *delim)
 					marker = NULL;
 				}
 				return (start_token);
-				break;
+				/*break;*/
 			}
 		}
 	}
 	if (marker[i] == '\0')
 		marker = NULL;
-	return(start_token);
+	return (start_token);
 }
