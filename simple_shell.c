@@ -6,6 +6,7 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <signal.h>
 int main(int ac, char *envp[]);
 
 /**
@@ -16,79 +17,132 @@ int main(int ac, char *envp[]);
  * @envp: environment variable
  * Return: 0 Always
  */
-int main(int ac, char *envp[]) {
+int main(int ac, char *envp[])
+{
 	size_t n = 0;
 	pid_t child;
 	char *lineptr = NULL, *token = NULL, *temptoken[32];
 	int i, status, chill, length = 0;
+	char *path, *dir, *executable_path;
 
-	while (1) {
-		if (isatty(STDIN_FILENO) && isatty(STDOUT_FILENO) && ac == 1) {
+	signal(SIGINT, SIG_IGN);
+	while (1)
+	{
+		if (isatty(STDIN_FILENO) && isatty(STDOUT_FILENO) && ac == 1)
+		{
 			printf("$ ");
 			fflush(stdout);
 		}
-
-		if (_getline(&lineptr, &n, stdin) != -1) {
+		if (_getline(&lineptr, &n, stdin) != -1)
+		{
 			length = strlen(lineptr);
 			if (length > 0)
 				lineptr[length - 1] = '\0';
-		} else {
-			if (feof(stdin)) {
+		}
+		else
+		{
+			if (feof(stdin))
+			{
 				free(lineptr);
 				exit(EXIT_FAILURE);
 			}
 			perror("Getline failed");
 			free(lineptr);
-			exit(1);
+			exit(EXIT_FAILURE);
 		}
-
-		token = strtok(lineptr, " ");
-		for (i = 0; token != NULL && i < 31; i++) {
+		token = _strtok(lineptr, " ");
+		for (i = 0; token != NULL && i < 31; i++)
+		{
 			temptoken[i] = token;
-			token = strtok(NULL, " ");
+			token = _strtok(NULL, " ");
 		}
-
 		temptoken[i] = NULL;
-		if (temptoken[0] != NULL && strcmp(temptoken[0], "exit") == 0) {
+		if (temptoken[0] != NULL && strcmp(temptoken[0], "exit") == 0)
+		{
 			free(lineptr);
 			printf("Terminal Closed\n");
 			exit(0);
 		}
-
+		if (temptoken[0] != NULL && strcmp(temptoken[0], "env") == 0)
+		{
+			for (i = 0; environ[i] != NULL; i++)
+			{
+				printf("%s\n", environ[i]);
+			}
+			free(lineptr);
+			exit(EXIT_SUCCESS);
+		}
 		child = fork();
-		if (child == -1) {
+		if (child == -1)
+		{
 			perror("./hsh");
 			free(lineptr);
 			return (-1);
 		}
-
-		if (child == 0) {
-			if (temptoken[0] == NULL || strcmp(temptoken[0], "") == 0) {
+		if (child == 0)
+		{
+			if (temptoken[0] == NULL || strcmp(temptoken[0], "") == 0)
+			{
 				free(lineptr);
 				exit(0);
 			}
 
-			if (strcmp(temptoken[0], "env") == 0) {
-				for (i = 0; envp[i] != NULL; i++) {
-					printf("%s\n", envp[i]);
+			if (strchr(temptoken[0], '/') != NULL)
+			{
+				if (execve(temptoken[0], temptoken, envp) == -1)
+				{
+					perror("./hsh here");
+					free(lineptr);
+					exit(EXIT_FAILURE);
 				}
-				free(lineptr);
-				exit(EXIT_SUCCESS);
 			}
-
-			if (execve(temptoken[0], temptoken, envp) == -1) {
-				perror("./hsh here");
+			path = getenv("PATH");
+			if (path == NULL)
+			{
+				fprintf(stderr, "Error: PATH variable not found.\n");
 				free(lineptr);
 				exit(EXIT_FAILURE);
 			}
-		} else {
+			dir = strtok(path, ":");
+			while (dir != NULL)
+			{
+				executable_path = malloc(strlen(dir) + strlen(temptoken[0]) + 2);
+				if (executable_path == NULL)
+				{
+					perror("Malloc failed");
+					free(lineptr);
+					exit(EXIT_FAILURE);
+				}
+				strcpy(executable_path, dir);
+				strcat(executable_path, "/");
+				strcat(executable_path, temptoken[0]);
+
+				if (access(executable_path, X_OK) == 0)
+				{
+					if (execve(executable_path, temptoken, envp) == -1)
+					{
+						perror("./hsh here");
+						free(lineptr);
+						exit(EXIT_FAILURE);
+					}
+				}
+
+				free(executable_path);
+				dir = strtok(NULL, ":");
+			}
+			fprintf(stderr, "Command not found: %s\n", temptoken[0]);
+			free(lineptr);
+			exit(EXIT_FAILURE);
+		}
+		else
+		{
 			wait(&chill);
-			if (WIFEXITED(chill)) {
+			if (WIFEXITED(chill))
+			{
 				status = WEXITSTATUS(chill);
 			}
 		}
 	}
-
 	printf("\n");
 	free(lineptr);
 	return (status);
