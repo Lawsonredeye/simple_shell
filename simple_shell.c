@@ -63,15 +63,6 @@ int main(int ac, char *envp[])
 			printf("Terminal Closed\n");
 			exit(0);
 		}
-		if (temptoken[0] != NULL && strcmp(temptoken[0], "env") == 0)
-		{
-			for (i = 0; environ[i] != NULL; i++)
-			{
-				printf("%s\n", environ[i]);
-			}
-			free(lineptr);
-			exit(EXIT_SUCCESS);
-		}
 		child = fork();
 		if (child == -1)
 		{
@@ -81,12 +72,20 @@ int main(int ac, char *envp[])
 		}
 		if (child == 0)
 		{
+			if (temptoken[0] != NULL && strcmp(temptoken[0], "env") == 0)
+			{
+				for (i = 0; environ[i] != NULL; i++)
+				{
+					printf("%s\n", environ[i]);
+				}
+				free(lineptr);
+				exit(0);
+			}
 			if (temptoken[0] == NULL || strcmp(temptoken[0], "") == 0)
 			{
 				free(lineptr);
 				exit(0);
 			}
-
 			if (strchr(temptoken[0], '/') != NULL)
 			{
 				if (execve(temptoken[0], temptoken, envp) == -1)
