@@ -10,6 +10,7 @@
  * @stream: where the file is being read from
  * Return: the number of character read
  */
+ssize_t _getline(char **lineptr, size_t *n, FILE *stream);
 ssize_t _getline(char **lineptr, size_t *n, FILE *stream)
 {
 	char *buffer;
@@ -59,6 +60,6 @@ ssize_t _getline(char **lineptr, size_t *n, FILE *stream)
 	else
 	{
 		*lineptr[0] = '\0';
-		return(0);
+		return (0);
 	}
 }
