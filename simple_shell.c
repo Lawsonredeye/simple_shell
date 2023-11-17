@@ -16,31 +16,24 @@ int main(int ac, char *envp[]);
  * @envp: environment variable
  * Return: 0 Always
  */
-int main(int ac, char *envp[])
-{
+int main(int ac, char *envp[]) {
 	size_t n = 0;
 	pid_t child;
 	char *lineptr = NULL, *token = NULL, *temptoken[32];
-	int i, status, chill, lenght = 0;
+	int i, status, chill, length = 0;
 
-	while (1)
-	{
-		if (isatty(STDIN_FILENO) && isatty(STDOUT_FILENO) && ac == 1)
-		{
+	while (1) {
+		if (isatty(STDIN_FILENO) && isatty(STDOUT_FILENO) && ac == 1) {
 			printf("$ ");
 			fflush(stdout);
 		}
-		/* get cracters from the stdin and store it in a buffer */
-		if (_getline(&lineptr, &n, stdin) != -1) /*checking if getline fails */
-		{
-			lenght = strlen(lineptr);
-			if (lenght > 0)
-				lineptr[lenght - 1] = '\0';
-		}
-		else
-		{
-			if (feof(stdin))
-			{
+
+		if (_getline(&lineptr, &n, stdin) != -1) {
+			length = strlen(lineptr);
+			if (length > 0)
+				lineptr[length - 1] = '\0';
+		} else {
+			if (feof(stdin)) {
 				free(lineptr);
 				exit(EXIT_FAILURE);
 			}
@@ -48,63 +41,54 @@ int main(int ac, char *envp[])
 			free(lineptr);
 			exit(1);
 		}
-		/*storing a temp value in the token to be tokenized/ parsed */
-		token = _strtok(lineptr, " ");
-		for (i = 0; token != NULL && i < 31; i++)
-		{
+
+		token = strtok(lineptr, " ");
+		for (i = 0; token != NULL && i < 31; i++) {
 			temptoken[i] = token;
-			token = _strtok(NULL, " ");
+			token = strtok(NULL, " ");
 		}
-		/*put the last element in the temptoken to NULL to indicate end*/
+
 		temptoken[i] = NULL;
-		if (temptoken[0] != NULL && strcmp(temptoken[0], "exit") == 0)
-			/*check if the tokenized character is exit to close the terminal*/
-		{
+		if (temptoken[0] != NULL && strcmp(temptoken[0], "exit") == 0) {
 			free(lineptr);
 			printf("Terminal Closed\n");
 			exit(0);
 		}
+
 		child = fork();
-		if (child == -1)
-		{
+		if (child == -1) {
 			perror("./hsh");
 			free(lineptr);
 			return (-1);
 		}
-		if (child == 0)
-		{
-			if (temptoken[0] == NULL || strcmp(temptoken[0], "") == 0)
-			{
+
+		if (child == 0) {
+			if (temptoken[0] == NULL || strcmp(temptoken[0], "") == 0) {
 				free(lineptr);
 				exit(0);
 			}
-			/*check if the string entered inside the child process is env*/
-			if (strcmp(temptoken[0], "env") == 0)
-			{
-				for (i = 0; envp[i] != NULL; i++)
-				{
+
+			if (strcmp(temptoken[0], "env") == 0) {
+				for (i = 0; envp[i] != NULL; i++) {
 					printf("%s\n", envp[i]);
 				}
 				free(lineptr);
 				exit(EXIT_SUCCESS);
 			}
-			if (execve(temptoken[0], temptoken, NULL) == -1)
-				/*checks if the execve fails to stop the program*/
-			{
+
+			if (execve(temptoken[0], temptoken, envp) == -1) {
 				perror("./hsh here");
 				free(lineptr);
-				return (-1);
+				exit(EXIT_FAILURE);
 			}
-		}
-		else
-		{
+		} else {
 			wait(&chill);
-			if (WIFEXITED(chill))
-			{
+			if (WIFEXITED(chill)) {
 				status = WEXITSTATUS(chill);
 			}
 		}
 	}
+
 	printf("\n");
 	free(lineptr);
 	return (status);
