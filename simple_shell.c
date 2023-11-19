@@ -28,7 +28,7 @@ int main(int ac, char *envp[])
 	signal(SIGINT, CtrlCHandler);
 	if (isatty(STDIN_FILENO) && isatty(STDOUT_FILENO) && ac == 1)
 	{
-		printf(" ");
+		printf("$ ");
 		fflush(stdout);
 	}
 	while (1)
@@ -46,7 +46,7 @@ int main(int ac, char *envp[])
 				free(lineptr);
 				exit(EXIT_FAILURE);
 			}
-			perror("Getline failed");
+			perror("./hsh");
 			free(lineptr);
 			exit(EXIT_FAILURE);
 		}
@@ -60,7 +60,7 @@ int main(int ac, char *envp[])
 		if (temptoken[0] != NULL && strcmp(temptoken[0], "exit") == 0)
 		{
 			free(lineptr);
-			printf("Terminal Closed\n");
+			printf("Shell Closed\n");
 			exit(0);
 		}
 		child = fork();
@@ -90,7 +90,7 @@ int main(int ac, char *envp[])
 			{
 				if (execve(temptoken[0], temptoken, envp) == -1)
 				{
-					perror("./hsh here");
+					perror("./hsh");
 					free(lineptr);
 					exit(EXIT_FAILURE);
 				}
@@ -98,7 +98,7 @@ int main(int ac, char *envp[])
 			path = getenv("PATH");
 			if (path == NULL)
 			{
-				fprintf(stderr, "Error: PATH variable not found.\n");
+				fprintf(stderr, "./hsh\n");
 				free(lineptr);
 				exit(EXIT_FAILURE);
 			}
@@ -108,7 +108,7 @@ int main(int ac, char *envp[])
 				executable_path = malloc(strlen(dir) + strlen(temptoken[0]) + 2);
 				if (executable_path == NULL)
 				{
-					perror("Malloc failed");
+					perror("./hsh failed");
 					free(lineptr);
 					exit(EXIT_FAILURE);
 				}
@@ -120,7 +120,7 @@ int main(int ac, char *envp[])
 				{
 					if (execve(executable_path, temptoken, envp) == -1)
 					{
-						perror("./hsh here");
+						perror("./hsh");
 						free(lineptr);
 						exit(EXIT_FAILURE);
 					}
@@ -129,7 +129,8 @@ int main(int ac, char *envp[])
 				free(executable_path);
 				dir = strtok(NULL, ":");
 			}
-			fprintf(stderr, "Command not found: %s\n", temptoken[0]);
+			perror("./hsh");
+			/*fprintf(stderr, "Command not found: %s\n", temptoken[0]);*/
 			free(lineptr);
 			exit(EXIT_FAILURE);
 		}
@@ -141,6 +142,7 @@ int main(int ac, char *envp[])
 				status = WEXITSTATUS(chill);
 			}
 		}
+		printf("$ ");
 	}
 	printf("\n");
 	free(lineptr);
